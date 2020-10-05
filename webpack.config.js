@@ -5,7 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.ts',
+  entry: './src/js/index.ts',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle-[hash].js',
@@ -39,7 +39,7 @@ module.exports = {
         ],
       },
       {
-        test: /\.(svg|woff|woff2|ttf|eot|otf)([\?]?.*)$/,
+        test: /\.(svg|woff|woff2|ttf|eot|otf|png)([\?]?.*)$/,
         loader: 'file-loader?name=assets/fonts/[name].[ext]',
       },
     ],
