@@ -4,3 +4,9 @@ export interface ISprite {
   platformImage: string;
   blockImage: string;
 }
+
+export enum Key {
+  arrowRight = 'ArrowRight',
+  arrowLeft = 'ArrowLeft',
+  space = ' ',
+}

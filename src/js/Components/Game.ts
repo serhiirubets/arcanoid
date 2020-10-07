@@ -6,9 +6,9 @@ import blockImage from '../../assets/img/block.png';
 import { loadPicture } from '../loadPicture';
 import { getCenterXCoord } from '../helpers';
 import { Ball } from './Ball';
-import { BaseComponent } from './BaseComponent';
 import { Blocks } from './Blocks';
 import { config } from '../config';
+import { Key } from '../../types';
 
 const sprites: Record<string, string> = {
   backgroundImage,
@@ -18,19 +18,44 @@ const sprites: Record<string, string> = {
 };
 
 export class Game {
-  private ctx: CanvasRenderingContext2D;
+  private ctx!: CanvasRenderingContext2D;
   private sprites: Record<string, HTMLImageElement> = {};
-  private platform: BaseComponent = new Platform();
   private ball: Ball = new Ball();
+  private platform: Platform = new Platform(this.ball);
   private blocks: Blocks = new Blocks(config.block.rows, config.block.cols);
 
   constructor(private canvas: HTMLCanvasElement) {
-    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    this.init();
   }
 
   public start() {
     this.preload();
     this.run();
+  }
+
+  private init() {
+    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    this.setEvents();
+  }
+
+  private onWindowKeydown = (e: KeyboardEvent): void => {
+    if (e.key === Key.arrowLeft || e.key === Key.arrowRight) {
+      this.platform.start(e.key);
+      return;
+    }
+
+    if (e.key === Key.space) {
+      this.platform.fire();
+    }
+  };
+
+  private onWindowKeyup = (): void => {
+    this.platform.stop();
+  };
+
+  private setEvents(): void {
+    window.addEventListener('keydown', this.onWindowKeydown);
+    window.addEventListener('keyup', this.onWindowKeyup);
   }
 
   private preload(): void {
@@ -40,10 +65,11 @@ export class Game {
     });
 
     this.blocks.create();
+    this.platform.setCoords(getCenterXCoord(this.canvas.width, this.sprites.platformImage.width), 300);
+    this.ball.setCoords(getCenterXCoord(this.canvas.width, 20), 280);
   }
 
   private renderPlatform(): void {
-    this.platform.setCoords(getCenterXCoord(this.canvas.width, this.sprites.platformImage.width), 300);
     this.ctx.drawImage(this.sprites.platformImage, this.platform.x, this.platform.y);
   }
 
@@ -52,7 +78,6 @@ export class Game {
   }
 
   private renderBall() {
-    this.ball.setCoords(getCenterXCoord(this.canvas.width, 20), 280);
     this.ctx.drawImage(
       this.sprites.ballImage,
       0,
@@ -83,9 +108,16 @@ export class Game {
     });
   }
 
+  private updateState() {
+    this.platform.move();
+    this.ball.move();
+  }
+
   private run(): void {
     window.requestAnimationFrame(() => {
+      this.updateState();
       this.render();
+      this.run();
     });
   }
 }
