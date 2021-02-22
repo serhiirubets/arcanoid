@@ -46,8 +46,12 @@ export class Ball extends MovableComponent {
   }
 
   public bumbBlock() {
-    // block: Block
-    // this.dy = -this.dy;
     this.dy *= -1;
+  }
+
+  public bumbPlatform() {
+    this.dy *= -1;
+    // const touchX = (this.x + this.width) / 2;
+    // this.dx = getRandomNumber(-velocity, velocity);
   }
 }

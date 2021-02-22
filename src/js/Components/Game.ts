@@ -126,6 +126,10 @@ export class Game {
         this.ball.bumbBlock()
       }
     }
+
+    if (this.ball.collide(this.platform)) {
+      this.ball.bumbPlatform();
+    }
   }
 
   private run(): void {
