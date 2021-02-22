@@ -8,4 +8,12 @@ export const config = {
     startX: 65,
     startY: 35,
   },
+  ball: {
+    width: 20,
+    height: 20
+  },
+  platform: {
+    width: 100,
+    height: 14,
+  }
 };

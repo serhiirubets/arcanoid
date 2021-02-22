@@ -5,8 +5,8 @@ import { Key } from '../../types';
 export class Platform extends MovableComponent {
   private ball: Ball | null;
 
-  constructor(ball: Ball) {
-    super();
+  constructor(width: number, height: number, ball: Ball) {
+    super(width, height);
     this.ball = ball;
   }
 
@@ -29,7 +29,7 @@ export class Platform extends MovableComponent {
 
   public fire(): void {
     if (this.ball) {
-      this.ball.jump();
+      this.ball.start();
       this.ball = null;
     }
   }

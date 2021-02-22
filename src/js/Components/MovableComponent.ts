@@ -6,4 +6,5 @@ export abstract class MovableComponent extends BaseComponent {
 
   abstract stop(): void;
   abstract move(): void;
+  // abstract start(): void;
 }

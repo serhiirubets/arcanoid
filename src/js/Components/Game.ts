@@ -1,14 +1,15 @@
 import { Platform } from './Platform';
-import backgroundImage from '../../assets/img/background.png';
-import ballImage from '../../assets/img/ball.png';
-import platformImage from '../../assets/img/platform.png';
-import blockImage from '../../assets/img/block.png';
 import { loadPicture } from '../loadPicture';
 import { getCenterXCoord } from '../helpers';
 import { Ball } from './Ball';
 import { Blocks } from './Blocks';
 import { config } from '../config';
 import { Key } from '../../types';
+
+import backgroundImage from '../../assets/img/background.png';
+import ballImage from '../../assets/img/ball.png';
+import platformImage from '../../assets/img/platform.png';
+import blockImage from '../../assets/img/block.png';
 
 const sprites: Record<string, string> = {
   backgroundImage,
@@ -18,24 +19,21 @@ const sprites: Record<string, string> = {
 };
 
 export class Game {
-  private ctx!: CanvasRenderingContext2D;
+  private ctx: CanvasRenderingContext2D;
   private sprites: Record<string, HTMLImageElement> = {};
-  private ball: Ball = new Ball();
-  private platform: Platform = new Platform(this.ball);
+  private ball: Ball = new Ball(config.ball.width, config.ball.height);
+  private platform: Platform = new Platform(config.platform.width, config.platform.height, this.ball);
   private blocks: Blocks = new Blocks(config.block.rows, config.block.cols);
+  private preloadedAssets!: Promise<void>[];
 
   constructor(private canvas: HTMLCanvasElement) {
-    this.init();
+    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
   }
 
   public start() {
     this.preload();
-    this.run();
-  }
-
-  private init() {
-    this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.setEvents();
+    this.run();
   }
 
   private onWindowKeydown = (e: KeyboardEvent): void => {
@@ -58,15 +56,19 @@ export class Game {
     window.addEventListener('keyup', this.onWindowKeyup);
   }
 
-  private preload(): void {
+  private setUpAssets() {
     Object.keys(sprites).forEach((key: string) => {
       this.sprites[key] = new Image();
       this.sprites[key].src = sprites[key];
     });
+  }
 
+  private preload(): void {
+    this.setUpAssets();
     this.blocks.create();
     this.platform.setCoords(getCenterXCoord(this.canvas.width, this.sprites.platformImage.width), 300);
     this.ball.setCoords(getCenterXCoord(this.canvas.width, 20), 280);
+    this.preloadedAssets = Object.keys(sprites).map((key) => loadPicture(this.sprites[key], sprites[key]));
   }
 
   private renderPlatform(): void {
@@ -82,12 +84,12 @@ export class Game {
       this.sprites.ballImage,
       0,
       0,
-      this.ball.frameWidth,
-      this.ball.frameHeight,
+      this.ball.width,
+      this.ball.height,
       this.ball.x,
       this.ball.y,
-      this.ball.frameWidth,
-      this.ball.frameHeight
+      this.ball.width,
+      this.ball.height
     );
   }
 
@@ -97,10 +99,17 @@ export class Game {
     });
   }
 
-  private render(): void {
-    const promises = Object.keys(sprites).map((key) => loadPicture(this.sprites[key], sprites[key]));
+  /**
+   * Clear all canvas before render new assets
+   */
+  private clearCanvas() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
 
-    Promise.all(promises).then(() => {
+  private render(): void {
+    this.clearCanvas();
+
+    Promise.all(this.preloadedAssets).then(() => {
       this.renderBackground();
       this.renderPlatform();
       this.renderBall();
@@ -111,6 +120,12 @@ export class Game {
   private updateState() {
     this.platform.move();
     this.ball.move();
+
+    for (const block of this.blocks.blocks) {
+      if (this.ball.collide(block)) {
+        this.ball.bumbBlock()
+      }
+    }
   }
 
   private run(): void {
