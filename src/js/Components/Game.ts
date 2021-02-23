@@ -95,7 +95,9 @@ export class Game {
 
   private renderBlocks() {
     this.blocks.blocks.forEach((block) => {
-      this.ctx.drawImage(this.sprites.blockImage, block.x, block.y);
+      if (block.active) {
+        this.ctx.drawImage(this.sprites.blockImage, block.x, block.y);
+      }
     });
   }
 
@@ -117,19 +119,25 @@ export class Game {
     });
   }
 
+  private collideBlocks() {
+    for (const block of this.blocks.blocks) {
+      if (block.active && this.ball.collide(block)) {
+        this.ball.bumbBlock(block)
+      }
+    }
+  }
+
+  private collidePlatform() {
+    if (this.ball.collide(this.platform)) {
+      this.ball.bumbPlatform(this.platform);
+    }
+  }
+
   private updateState() {
     this.platform.move();
     this.ball.move();
-
-    for (const block of this.blocks.blocks) {
-      if (this.ball.collide(block)) {
-        this.ball.bumbBlock()
-      }
-    }
-
-    if (this.ball.collide(this.platform)) {
-      this.ball.bumbPlatform();
-    }
+    this.collideBlocks();
+    this.collidePlatform();
   }
 
   private run(): void {

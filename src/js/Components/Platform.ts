@@ -37,4 +37,15 @@ export class Platform extends MovableComponent {
   public stop(): void {
     this.dx = 0;
   }
+
+  getTouchOffset(touchX: number) {
+    const rightSide = this.x + this.width;
+    const diff = rightSide - touchX;
+    const offset = this.width - diff;
+
+    // this.width - 2 (diff and offset
+    // offset - ? ( (offset + 2) / 2 )
+    const result = (offset * 2) / this.width; // from 0 to 2, but we need from -1 to 1
+    return result - 1; // but we need from -1 to 1. So we make -1
+  }
 }
