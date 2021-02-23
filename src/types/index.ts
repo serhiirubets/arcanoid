@@ -1,4 +1,4 @@
-export interface ISprite {
+export interface Sprite {
   backgroundImage: string;
   ballImage: string;
   platformImage: string;

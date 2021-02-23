@@ -28,7 +28,7 @@ export class Game {
   private sprites: Record<string, HTMLImageElement> = {};
   private sounds: Record<string, HTMLAudioElement> = {};
   private ball: Ball = new Ball(this);
-  private platform: Platform = new Platform(config.platform.width, config.platform.height, this.ball);
+  private platform: Platform = new Platform(this.ball);
   private blocks: Blocks = new Blocks(config.block.rows, config.block.cols);
   private preloadedAssets!: Promise<void>[];
   private isRunning = true;
@@ -36,6 +36,12 @@ export class Game {
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
+    this.setFonts();
+  }
+
+  private setFonts() {
+    this.ctx.font = '20px Arial';
+    this.ctx.fillStyle = '#fff';
   }
 
   public start() {
@@ -90,8 +96,8 @@ export class Game {
   private preload(): void {
     this.setUpAssets();
     this.blocks.create();
-    this.platform.setCoords(getCenterXCoord(this.canvas.width, this.sprites.platformImage.width), 300);
-    this.ball.setCoords(getCenterXCoord(this.canvas.width, 20), 280);
+    this.platform.setCoords(getCenterXCoord(this.canvas.width, config.platform.width), 300);
+    this.ball.setCoords(getCenterXCoord(this.canvas.width, config.ball.width), 280);
     this.preloadAssets();
   }
 
@@ -106,7 +112,7 @@ export class Game {
   private renderBall() {
     this.ctx.drawImage(
       this.sprites.ballImage,
-      0,
+      this.ball.frame * this.ball.width,
       0,
       this.ball.width,
       this.ball.height,
@@ -140,6 +146,7 @@ export class Game {
       this.renderPlatform();
       this.renderBall();
       this.renderBlocks();
+      this.renderScoreText();
     });
   }
 
@@ -175,6 +182,7 @@ export class Game {
 
   private stop() {
     this.isRunning = false;
+    this.ball.stop();
   }
 
   private run(): void {
@@ -199,5 +207,9 @@ export class Game {
     if (this.score >= this.blocks.blocks.length) {
       this.end('Successfully finish');
     }
+  }
+
+  private renderScoreText() {
+    this.ctx.fillText(`Score: ${this.score}`, 290, 23);
   }
 }

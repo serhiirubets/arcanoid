@@ -6,8 +6,8 @@ import { config } from '../config';
 export class Platform extends MovableComponent {
   private ball: Ball | null;
 
-  constructor(width: number, height: number, ball: Ball) {
-    super(width, height);
+  constructor(ball: Ball) {
+    super(config.platform.width, config.platform.height);
     this.ball = ball;
   }
 
@@ -54,7 +54,6 @@ export class Platform extends MovableComponent {
     const x = this.x + this.dx;
     const platformLeftSide = x;
     const platformRightSide = platformLeftSide + this.width;
-
     const canvasLeftSide = 0;
     const canvasRightSide = config.game.width;
 

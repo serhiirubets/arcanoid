@@ -10,14 +10,26 @@ export class Ball extends MovableComponent {
   public velocity = 3;
   public dy = 0;
   public dx = 0;
+  public frame = 0;
+  private timer?: number;
 
   constructor(private game: Game) {
     super(config.ball.width, config.ball.height)
   }
 
+  private animate() {
+    this.timer = window.setInterval(() => {
+      this.frame++;
+      if (this.frame > 3) {
+        this.frame = 0;
+      }
+    }, 100);
+  }
+
   public start(): void {
     this.dy = -this.velocity;
     this.dx = getRandomNumber(-this.velocity, this.velocity);
+    this.animate();
   }
 
   public move() {
@@ -32,6 +44,8 @@ export class Ball extends MovableComponent {
   public stop(): void {
     this.dx = 0;
     this.dy = 0;
+
+    clearInterval(this.timer)
   }
 
   public collide(element: BaseComponent): boolean {
