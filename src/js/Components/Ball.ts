@@ -86,13 +86,17 @@ export class Ball extends MovableComponent {
     if (ballLeftSide < canvasLeftSide)  {
       this.x = 0;
       this.dx = this.velocity;
+      this.game.bumpPlay();
     } else if (ballRightSide > canvasRightSide) {
       this.x = canvasRightSide - this.width;
       this.dx = -this.velocity;
+      this.game.bumpPlay();
     } else if (ballTopSide < canvasTopSide) {
       this.dy = this.velocity;
       this.y = 0;
+      this.game.bumpPlay();
     } else if (ballBottomSide > canvasBottomSide) {
+      this.game.bumpPlay();
       this.game.end('Game is finished');
     }
   }

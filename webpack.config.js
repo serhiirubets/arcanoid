@@ -39,8 +39,8 @@ module.exports = {
         ],
       },
       {
-        test: /\.(svg|woff|woff2|ttf|eot|otf|png)([\?]?.*)$/,
-        loader: 'file-loader?name=assets/fonts/[name].[ext]',
+        test: /\.(svg|woff|woff2|ttf|eot|otf|png|mp3)([\?]?.*)$/,
+        loader: 'file-loader?name=assets/[name].[ext]',
       },
     ],
   },

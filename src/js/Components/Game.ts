@@ -1,6 +1,5 @@
 import { Platform } from './Platform';
-import { loadPicture } from '../loadPicture';
-import { getCenterXCoord } from '../helpers';
+import { getCenterXCoord, loadAudio, loadPicture } from '../helpers';
 import { Ball } from './Ball';
 import { Blocks } from './Blocks';
 import { config } from '../config';
@@ -11,6 +10,8 @@ import ballImage from '../../assets/img/ball.png';
 import platformImage from '../../assets/img/platform.png';
 import blockImage from '../../assets/img/block.png';
 
+import bump from '../../assets/sounds/bump.mp3';
+
 const sprites: Record<string, string> = {
   backgroundImage,
   ballImage,
@@ -18,9 +19,14 @@ const sprites: Record<string, string> = {
   blockImage,
 };
 
+const sounds: Record<string, string> = {
+  bump,
+}
+
 export class Game {
   private ctx: CanvasRenderingContext2D;
   private sprites: Record<string, HTMLImageElement> = {};
+  private sounds: Record<string, HTMLAudioElement> = {};
   private ball: Ball = new Ball(this);
   private platform: Platform = new Platform(config.platform.width, config.platform.height, this.ball);
   private blocks: Blocks = new Blocks(config.block.rows, config.block.cols);
@@ -63,6 +69,22 @@ export class Game {
       this.sprites[key] = new Image();
       this.sprites[key].src = sprites[key];
     });
+
+    Object.keys(sounds).forEach((key: string) => {
+      this.sounds[key] = new Audio(sounds[key]);
+    });
+  }
+
+  private preloadImageAssets(): Promise<void>[] {
+    return Object.keys(sprites).map((key) => loadPicture(this.sprites[key], sprites[key]));
+  }
+
+  private preloadAudioAssets(): Promise<void>[] {
+    return Object.keys(sounds).map((key) => loadAudio(this.sounds[key]));
+  }
+
+  private preloadAssets(): void {
+    this.preloadedAssets = [...this.preloadImageAssets(), ...this.preloadAudioAssets()];
   }
 
   private preload(): void {
@@ -70,7 +92,7 @@ export class Game {
     this.blocks.create();
     this.platform.setCoords(getCenterXCoord(this.canvas.width, this.sprites.platformImage.width), 300);
     this.ball.setCoords(getCenterXCoord(this.canvas.width, 20), 280);
-    this.preloadedAssets = Object.keys(sprites).map((key) => loadPicture(this.sprites[key], sprites[key]));
+    this.preloadAssets();
   }
 
   private renderPlatform(): void {
@@ -126,6 +148,7 @@ export class Game {
       if (block.active && this.ball.collide(block)) {
         this.ball.bumpBlock(block);
         this.addScore();
+        this.bumpPlay();
       }
     }
   }
@@ -133,7 +156,12 @@ export class Game {
   private collidePlatform() {
     if (this.ball.collide(this.platform)) {
       this.ball.bumpPlatform(this.platform);
+      this.bumpPlay();
     }
+  }
+
+  public bumpPlay() {
+    this.sounds.bump.play();
   }
 
   private updateState() {
