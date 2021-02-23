@@ -1,6 +1,7 @@
 import { MovableComponent } from './MovableComponent';
 import { Ball } from './Ball';
 import { Key } from '../../types';
+import { config } from '../config';
 
 export class Platform extends MovableComponent {
   private ball: Ball | null;
@@ -47,5 +48,18 @@ export class Platform extends MovableComponent {
     // offset - ? ( (offset + 2) / 2 )
     const result = (offset * 2) / this.width; // from 0 to 2, but we need from -1 to 1
     return result - 1; // but we need from -1 to 1. So we make -1
+  }
+
+  public collideCanvasSides() {
+    const x = this.x + this.dx;
+    const platformLeftSide = x;
+    const platformRightSide = platformLeftSide + this.width;
+
+    const canvasLeftSide = 0;
+    const canvasRightSide = config.game.width;
+
+    if (platformLeftSide < canvasLeftSide || platformRightSide > canvasRightSide)  {
+      this.dx = 0;
+    }
   }
 }

@@ -21,10 +21,12 @@ const sprites: Record<string, string> = {
 export class Game {
   private ctx: CanvasRenderingContext2D;
   private sprites: Record<string, HTMLImageElement> = {};
-  private ball: Ball = new Ball(config.ball.width, config.ball.height);
+  private ball: Ball = new Ball(this);
   private platform: Platform = new Platform(config.platform.width, config.platform.height, this.ball);
   private blocks: Blocks = new Blocks(config.block.rows, config.block.cols);
   private preloadedAssets!: Promise<void>[];
+  private isRunning = true;
+  private score = 0;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -122,29 +124,52 @@ export class Game {
   private collideBlocks() {
     for (const block of this.blocks.blocks) {
       if (block.active && this.ball.collide(block)) {
-        this.ball.bumbBlock(block)
+        this.ball.bumpBlock(block);
+        this.addScore();
       }
     }
   }
 
   private collidePlatform() {
     if (this.ball.collide(this.platform)) {
-      this.ball.bumbPlatform(this.platform);
+      this.ball.bumpPlatform(this.platform);
     }
   }
 
   private updateState() {
-    this.platform.move();
-    this.ball.move();
     this.collideBlocks();
     this.collidePlatform();
+    this.ball.collideCanvasSides();
+    this.platform.collideCanvasSides();
+    this.platform.move();
+    this.ball.move();
+  }
+
+  private stop() {
+    this.isRunning = false;
   }
 
   private run(): void {
-    window.requestAnimationFrame(() => {
-      this.updateState();
-      this.render();
-      this.run();
-    });
+    if (this.isRunning) {
+      window.requestAnimationFrame(() => {
+        this.updateState();
+        this.render();
+        this.run();
+      });
+    }
+  }
+
+  public end(message: string) {
+    this.stop();
+    alert(message);
+    window.location.reload();
+  }
+
+  private addScore() {
+    this.score++;
+
+    if (this.score >= this.blocks.blocks.length) {
+      this.end('Successfully finish');
+    }
   }
 }

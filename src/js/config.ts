@@ -15,5 +15,9 @@ export const config = {
   platform: {
     width: 100,
     height: 14,
-  }
+  },
+  game: {
+    width: 640,
+    height: 360,
+  },
 };
